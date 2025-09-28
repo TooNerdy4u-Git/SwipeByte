@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SwipeBite MVP</title>
+  <style>
+    body { font-family: Arial; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f4f4f4; flex-direction: column; }
+    #card { width: 300px; height: 450px; background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; margin-bottom: 20px; }
+    #dish-img { width: 250px; height: 200px; border-radius: 10px; margin-bottom: 10px; object-fit: cover; }
+    button { margin: 10px; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+    #like { background-color: #4CAF50; color: white; }
+    #dislike { background-color: #f44336; color: white; }
+    #suggestions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .suggestion-card { width: 150px; height: 200px; background: white; border-radius: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 10px; }
+    .suggestion-card img { width: 120px; height: 100px; border-radius: 10px; margin-bottom: 5px; object-fit: cover; }
+  </style>
+</head>
+<body>
+  <div id="card">
+    <img id="dish-img" src="YOUR_IMAGE_HERE.jpg" alt="Dish Image">
+    <h2 id="dish-name"></h2>
+    <p id="dish-tags"></p>
+    <div>
+      <button id="like">👍 Like</button>
+      <button id="dislike">👎 Pass</button>
+    </div>
+  </div>
+
+  <div id="suggestions"></div>
+
+  <script>
+    const menu = [
+      {name: "Spicy Chickpea Wrap", tags: ["spicy", "vegan"], img: "chickenwrap.jpeg"},
+      {name: "Grilled Chicken Bowl", tags: ["protein", "low-carb"], img: "YOUR_IMAGE_HERE.jpg"},
+      {name: "Quinoa Salad", tags: ["healthy", "vegan", "light"], img: "YOUR_IMAGE_HERE.jpg"},
+      {name: "BBQ Beef Sandwich", tags: ["meat", "hearty"], img: "YOUR_IMAGE_HERE.jpg"},
+      {name: "Smoothie - Berry Blast", tags: ["sweet", "drink"], img: "YOUR_IMAGE_HERE.jpg"},
+      {name: "Avocado Toast", tags: ["healthy", "vegan", "light"], img: "YOUR_IMAGE_HERE.jpg"},
+      {name: "Protein Pancakes", tags: ["protein", "sweet"], img: "YOUR_IMAGE_HERE.jpg"},
+      {name: "Veggie Wrap", tags: ["vegan", "light"], img: "YOUR_IMAGE_HERE.jpg"},
+      {name: "Chicken Caesar Salad", tags: ["protein", "low-carb"], img: "YOUR_IMAGE_HERE.jpg"},
+      {name: "Fruit Parfait", tags: ["sweet", "light"], img: "YOUR_IMAGE_HERE.jpg"}
+    ];
+
+    let current = 0;
+    const likes = [];
+    const dislikes = [];
+
+    const dishName = document.getElementById("dish-name");
+    const dishTags = document.getElementById("dish-tags");
+    const dishImg = document.getElementById("dish-img");
+    const cardDiv = document.getElementById("card");
+    const suggestionsDiv = document.getElementById("suggestions");
+
+    function showDish() {
+      if(current < menu.length && likes.length < 3){
+        const dish = menu[current];
+        dishName.textContent = dish.name;
+        dishTags.textContent = "Tags: " + dish.tags.join(", ");
+        dishImg.src = dish.img; // placeholder image
+      } else if(likes.length >= 3){
+        showPreferencesAndSuggestions();
+      } else {
+        dishName.textContent = "No more dishes!";
+        dishTags.textContent = "";
+        cardDiv.style.display = "none";
+      }
+    }
+
+    function showPreferencesAndSuggestions(){
+      const allTags = likes.flatMap(d => d.tags);
+      const tagCounts = {};
+      allTags.forEach(tag => tagCounts[tag] = (tagCounts[tag] || 0) + 1);
+      const topTags = Object.entries(tagCounts).sort((a,b) => b[1]-a[1]).slice(0,2).map(t => t[0]);
+
+      dishName.textContent = "Your taste preferences: " + topTags.join(", ");
+      dishTags.textContent = "Here are 3 dishes you might like:";
+
+      const suggestions = menu.filter(d => topTags.some(tag => d.tags.includes(tag)) && !likes.includes(d)).slice(0,3);
+
+      suggestionsDiv.innerHTML = "";
+      suggestions.forEach(dish => {
+        const card = document.createElement("div");
+        card.className = "suggestion-card";
+        card.innerHTML = `<img src="${dish.img}" alt="Dish Image"><strong>${dish.name}</strong><p>${dish.tags.join(", ")}</p>`;
+        suggestionsDiv.appendChild(card);
+      });
+
+      document.getElementById("like").style.display = "none";
+      document.getElementById("dislike").style.display = "none";
+      dishImg.style.display = "none"; // hide main card image
+    }
+
+    document.getElementById("like").addEventListener("click", () => {
+      likes.push(menu[current]);
+      current++;
+      showDish();
+    });
+
+    document.getElementById("dislike").addEventListener("click", () => {
+      dislikes.push(menu[current]);
+      current++;
+      showDish();
+    });
+
+    showDish();
+  </script>
+</body>
+</html>
